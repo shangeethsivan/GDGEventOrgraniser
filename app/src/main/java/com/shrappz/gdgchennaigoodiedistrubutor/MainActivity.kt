@@ -4,15 +4,19 @@ package com.shrappz.gdgchennaigoodiedistrubutor
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +38,9 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.shrappz.gdgchennaigoodiedistrubutor.components.DummyProgress
 import com.shrappz.gdgchennaigoodiedistrubutor.ui.theme.GDGChennaiGoodieDistrubutorTheme
+import io.github.g00fy2.quickie.QRResult
+import io.github.g00fy2.quickie.ScanQRCode
+import kotlinx.coroutines.flow.MutableStateFlow
 
 
 class MainActivity : ComponentActivity() {
@@ -64,6 +71,29 @@ class MainActivity : ComponentActivity() {
     private var alertMessage = ""
 
     private var goodieChangeCounter = 0
+
+    private val bookingId = MutableStateFlow(TextFieldValue(""))
+
+    val scanQrCodeLauncher = registerForActivityResult(ScanQRCode()) { result ->
+        when (result) {
+            is QRResult.QRError -> {
+                alertTitle = "Unknown QR"
+                alertMessage = "Unknown QR"
+                alertImageRes = R.drawable.block
+            }
+            QRResult.QRMissingPermission -> {
+                alertTitle = "CAMERA PERMISSION"
+                alertMessage = "GIVE PERMISSION TO APP in APP settings"
+                alertImageRes = R.drawable.user_warning
+            }
+            is QRResult.QRSuccess -> {
+                Log.d(TAG, "result content::${result.content.rawValue}")
+                bookingId.value = TextFieldValue(result.content.rawValue)
+            }
+            QRResult.QRUserCanceled -> {
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,14 +131,14 @@ class MainActivity : ComponentActivity() {
                         )
                         val openDialog = remember { mutableStateOf(false) }
 
-                        val bookingIdState = remember { mutableStateOf(TextFieldValue("")) }
+                        val bookingIdState = bookingId.collectAsState(TextFieldValue(""))
+
                         var selectedTShirtSize by remember { mutableStateOf("") }
 
                         if (openDialog.value) {
                             AlertDialog(
                                 onDismissRequest = {
                                     openDialog.value = false
-                                    bookingIdState.value = TextFieldValue("")
                                     selectedTShirtSize = ""
                                 },
                                 title = {
@@ -123,8 +153,8 @@ class MainActivity : ComponentActivity() {
                                             painter = painterResource(id = alertImageRes),
                                             contentDescription = "Alert Image",
                                             modifier = Modifier
-                                                .height(80.dp)
-                                                .width(80.dp)
+                                                .height(50.dp)
+                                                .width(50.dp)
                                         )
                                         Text(
                                             alertMessage,
@@ -141,7 +171,6 @@ class MainActivity : ComponentActivity() {
                                         Button(
                                             onClick = {
                                                 openDialog.value = false
-                                                bookingIdState.value = TextFieldValue("")
                                                 selectedTShirtSize = ""
                                             }
                                         ) {
@@ -151,18 +180,39 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
+                        Image(
+                            painter = painterResource(id = R.drawable.qr_scanner),
+                            contentDescription = "QR Scanner",
+                            modifier = Modifier
+                                .height(50.dp)
+                                .width(50.dp)
+                                .padding(top = 20.dp)
+                                .clickable(onClick = {
+                                    scanQrCodeLauncher.launch(null)
+                                })
+                        )
                         TextField(
-                            modifier = Modifier.padding(top = 50.dp),
+                            modifier = Modifier.padding(top = 20.dp),
                             value = bookingIdState.value,
                             onValueChange = {
-                                bookingIdState.value = it
+                                bookingId.value = it
+                            },
+                            trailingIcon = {
+                                Icon(
+                                    Icons.Default.Clear,
+                                    contentDescription = "clear text",
+                                    modifier = Modifier
+                                        .clickable {
+                                            bookingId.value = TextFieldValue("")
+                                        }
+                                )
                             },
                             label = { Text(text = "Booking ID") },
                             maxLines = 1,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Number,
                                 imeAction = ImeAction.Next
-                            )
+                            ),
                         )
 
                         val listItems = arrayOf("S", "M", "L", "XL", "XXL")
@@ -216,8 +266,8 @@ class MainActivity : ComponentActivity() {
                         }
 
                         Button(modifier = Modifier.padding(top = 20.dp), onClick = {
-                            val bookingId = bookingIdState.value.text
-                            if (bookingId.isEmpty() || selectedTShirtSize.isEmpty()) {
+                            val bookingIdLocal = bookingId.value.text
+                            if (bookingIdLocal.isEmpty() || selectedTShirtSize.isEmpty()) {
                                 alertTitle = "Alert!"
                                 alertMessage = "Fill in Booking ID & T-Shirt Size"
                                 alertImageRes = R.drawable.user_warning
@@ -229,7 +279,7 @@ class MainActivity : ComponentActivity() {
                                     "goodie_distributed" to false
                                 )
                                 db.collection("registered_users")
-                                    .document(bookingId)
+                                    .document(bookingIdLocal)
                                     .get().addOnCompleteListener { registedUser ->
                                         val result = registedUser.result
                                         val ticketName = result.get("ticket_name")
@@ -239,11 +289,11 @@ class MainActivity : ComponentActivity() {
                                             val userName = registedUser.result.get("name")
                                             val userEmail = registedUser.result.get("email_id")
                                             val checkedInUsers = db.collection("checked_in_users")
-                                            checkedInUsers.document(bookingId).get()
+                                            checkedInUsers.document(bookingIdLocal).get()
                                                 .addOnCompleteListener {
                                                     if (!it.result.exists()) {
                                                         checkedInUsers
-                                                            .document(bookingId)
+                                                            .document(bookingIdLocal)
                                                             .set(userDetails)
                                                             .addOnCompleteListener {
                                                                 showProgressDialog = false
@@ -279,12 +329,12 @@ class MainActivity : ComponentActivity() {
                                             if (result.exists()) {
                                                 alertTitle = "Not Eligible for Day 1 Conference"
                                                 alertMessage =
-                                                    "ID : $bookingId, \n Ticket Type : $ticketName"
+                                                    "ID : $bookingIdLocal, \n Ticket Type : $ticketName"
                                                 alertImageRes = R.drawable.block
                                                 openDialog.value = true
                                             } else {
                                                 alertTitle = "Unknown Booking ID"
-                                                alertMessage = "ID : $bookingId"
+                                                alertMessage = "ID : $bookingIdLocal"
                                                 alertImageRes = R.drawable.block
                                                 openDialog.value = true
                                             }
@@ -292,7 +342,7 @@ class MainActivity : ComponentActivity() {
                                     }.addOnFailureListener {
                                         showProgressDialog = false
                                         alertTitle = "Booking ID FETCH Failed"
-                                        alertMessage = "ID : $bookingId"
+                                        alertMessage = "ID : $bookingIdLocal"
                                         alertImageRes = R.drawable.warning
                                         openDialog.value = true
                                     }
@@ -321,12 +371,12 @@ class MainActivity : ComponentActivity() {
                                         )
                                     }
                                 }, onLongClick = {
-                                    startActivity(
+                                    /*startActivity(
                                         Intent(
                                             this@MainActivity,
                                             AdminPanel::class.java
                                         )
-                                    )
+                                    )*/
                                 }),
                         )
                     }

@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "791255753837",
-    "project_id": "gdgdevfestchennai22",
-    "storage_bucket": "gdgdevfestchennai22.appspot.com"
+    "project_number": "858043568412",
+    "project_id": "gdg-chennai-devfest-22",
+    "storage_bucket": "gdg-chennai-devfest-22.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:791255753837:android:f22db6635512e3688fcb64",
+        "mobilesdk_app_id": "1:858043568412:android:4b11d26ce23422f16daad9",
         "android_client_info": {
           "package_name": "com.shrappz.gdgchennaigoodiedistrubutor"
         }
       },
       "oauth_client": [
         {
-          "client_id": "791255753837-lf7ekg41jhqoc7eb7b39kclsm0cla765.apps.googleusercontent.com",
+          "client_id": "858043568412-vdm5abi5aaesu63dfh8n69egd2om2ol7.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyD8dSF_KQtj7d2O89LVGLAn6WLlY45C0c4"
+          "current_key": "AIzaSyBESvtdYdsi1dsH2YqOdyjW3uAiWgHsxRA"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "791255753837-lf7ekg41jhqoc7eb7b39kclsm0cla765.apps.googleusercontent.com",
+              "client_id": "858043568412-vdm5abi5aaesu63dfh8n69egd2om2ol7.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

@@ -4,6 +4,7 @@ package com.shrappz.gdgchennaigoodiedistrubutor
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -83,6 +85,7 @@ class UsersLoadActivity : ComponentActivity() {
                     }
                 }
                 println("Successfully inserted rows: $counter")
+                Toast.makeText(applicationContext, "", Toast.LENGTH_SHORT).show()
             } catch (e: IOException) {
                 Log.e("MainActivity", "${e.message}")
             }

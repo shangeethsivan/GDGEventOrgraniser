@@ -3,15 +3,18 @@
 package com.shrappz.gdgchennaigoodiedistrubutor
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -34,6 +37,9 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.shrappz.gdgchennaigoodiedistrubutor.components.DummyProgress
 import com.shrappz.gdgchennaigoodiedistrubutor.ui.theme.GDGChennaiGoodieDistrubutorTheme
+import io.github.g00fy2.quickie.QRResult
+import io.github.g00fy2.quickie.ScanQRCode
+import kotlinx.coroutines.flow.MutableStateFlow
 
 
 class GoodieDistributionActivity : ComponentActivity() {
@@ -63,6 +69,34 @@ class GoodieDistributionActivity : ComponentActivity() {
     private var alertImageRes = R.drawable.warning
     private var alertMessage = ""
 
+
+    private val bookingId = MutableStateFlow(TextFieldValue(""))
+    val openDialog = MutableStateFlow(false)
+    val showProgressDialog = MutableStateFlow(false)
+
+
+    val scanQrCodeLauncher = registerForActivityResult(ScanQRCode()) { result ->
+        when (result) {
+            is QRResult.QRError -> {
+                alertTitle = "Unknown QR"
+                alertMessage = "Unknown QR"
+                alertImageRes = R.drawable.block
+            }
+            QRResult.QRMissingPermission -> {
+                alertTitle = "CAMERA PERMISSION"
+                alertMessage = "GIVE PERMISSION TO APP in APP settings"
+                alertImageRes = R.drawable.user_warning
+            }
+            is QRResult.QRSuccess -> {
+                Log.d(TAG, "result content::${result.content.rawValue}")
+                bookingId.value = TextFieldValue(result.content.rawValue)
+                buttonClick()
+            }
+            QRResult.QRUserCanceled -> {
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -85,10 +119,10 @@ class GoodieDistributionActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
 
-                    var showProgressDialog by remember { mutableStateOf(false) }
-                    if (showProgressDialog) {
+                    var showProgressDialogState = showProgressDialog.collectAsState(false)
+                    if (showProgressDialogState.value) {
                         DummyProgress(onDismiss = {
-                            showProgressDialog = false
+                            showProgressDialog.value = false
                         })
                     }
 
@@ -104,15 +138,12 @@ class GoodieDistributionActivity : ComponentActivity() {
                             textAlign = TextAlign.Center,
                             color = Color.DarkGray
                         )
-                        val openDialog = remember { mutableStateOf(false) }
 
-                        val bookingIdState = remember { mutableStateOf(TextFieldValue("")) }
-
-                        if (openDialog.value) {
+                        if (openDialog.collectAsState(false).value) {
                             AlertDialog(
                                 onDismissRequest = {
                                     openDialog.value = false
-                                    bookingIdState.value = TextFieldValue("")
+                                    bookingId.value = TextFieldValue("")
                                 },
                                 title = {
                                     Text(text = alertTitle, Modifier.padding(bottom = 20.dp))
@@ -126,8 +157,8 @@ class GoodieDistributionActivity : ComponentActivity() {
                                             painter = painterResource(id = alertImageRes),
                                             contentDescription = "Alert Image",
                                             modifier = Modifier
-                                                .height(80.dp)
-                                                .width(80.dp)
+                                                .height(50.dp)
+                                                .width(50.dp)
                                         )
                                         Text(
                                             alertMessage,
@@ -144,7 +175,7 @@ class GoodieDistributionActivity : ComponentActivity() {
                                         Button(
                                             onClick = {
                                                 openDialog.value = false
-                                                bookingIdState.value = TextFieldValue("")
+                                                bookingId.value = TextFieldValue("")
                                             }
                                         ) {
                                             Text("Dismiss")
@@ -154,12 +185,24 @@ class GoodieDistributionActivity : ComponentActivity() {
                             )
                         }
 
+                        Image(
+                            painter = painterResource(id = R.drawable.qr_scanner),
+                            contentDescription = "QR Scanner",
+                            modifier = Modifier
+                                .height(50.dp)
+                                .width(50.dp)
+                                .padding(top = 20.dp)
+                                .clickable(onClick = {
+                                    scanQrCodeLauncher.launch(null)
+                                })
+                        )
                         val keyboardController = LocalSoftwareKeyboardController.current
+                        val bookingIdState = bookingId.collectAsState(TextFieldValue(""))
                         TextField(
                             modifier = Modifier.padding(top = 50.dp),
                             value = bookingIdState.value,
                             onValueChange = {
-                                bookingIdState.value = it
+                                bookingId.value = it
                             },
                             label = { Text(text = "Booking ID") },
                             maxLines = 1,
@@ -175,65 +218,7 @@ class GoodieDistributionActivity : ComponentActivity() {
                         )
 
                         Button(modifier = Modifier.padding(top = 20.dp), onClick = {
-                            val bookingId = bookingIdState.value.text
-                            if (bookingId.isEmpty()) {
-                                alertTitle = "Alert!"
-                                alertMessage = "Fill in Booking ID"
-                                alertImageRes = R.drawable.user_warning
-                                openDialog.value = true
-                            } else {
-                                showProgressDialog = true
-                                val userDetails = mapOf(
-                                    "goodie_distributed" to true,
-                                )
-                                val checkedInUsers = db.collection("checked_in_users")
-                                checkedInUsers.document(bookingId).get()
-                                    .addOnCompleteListener { checkedInUser ->
-                                        val hasReceivedGoodie =
-                                            checkedInUser.result.get("goodie_distributed") == true
-                                        if (checkedInUser.result.exists() && !hasReceivedGoodie) {
-                                            val tShirtSize =
-                                                checkedInUser.result.get("t_shirt_size")
-                                            checkedInUsers
-                                                .document(bookingId)
-                                                .update(userDetails)
-                                                .addOnCompleteListener { registedUser ->
-                                                    showProgressDialog = false
-                                                    alertTitle = "Eligible for GOODIE"
-                                                    alertMessage =
-                                                        "ID : $bookingId \n T-SHIRT SIZE: $tShirtSize"
-                                                    alertImageRes = R.drawable.success
-                                                    openDialog.value = true
-                                                }.addOnFailureListener {
-                                                    showProgressDialog = false
-                                                    alertTitle = "Booking ID FETCH Failed"
-                                                    alertMessage = "ID : $bookingId"
-                                                    alertImageRes = R.drawable.warning
-                                                    openDialog.value = true
-                                                }
-                                        } else {
-                                            showProgressDialog = false
-                                            if (checkedInUser.result.exists()) {
-                                                alertTitle = "Goodie Already Distributed"
-                                                alertMessage = "ID : $bookingId"
-                                                alertImageRes = R.drawable.block
-                                                openDialog.value = true
-                                            } else {
-                                                alertTitle =
-                                                    "Unknown Booking ID / User Has not checked In"
-                                                alertMessage = "ID : $bookingId"
-                                                alertImageRes = R.drawable.block
-                                                openDialog.value = true
-                                            }
-                                        }
-                                    }.addOnFailureListener {
-                                        showProgressDialog = false
-                                        alertTitle = "Booking ID FETCH Failed"
-                                        alertMessage = "ID : $bookingId"
-                                        alertImageRes = R.drawable.warning
-                                        openDialog.value = true
-                                    }
-                            }
+                            buttonClick()
                         }) {
                             Text(text = "DISTRIBUTE GOODIE")
                         }
@@ -248,6 +233,68 @@ class GoodieDistributionActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    fun buttonClick() {
+        val localBookingId = bookingId.value.text
+        if (localBookingId.isEmpty()) {
+            alertTitle = "Alert!"
+            alertMessage = "Fill in Booking ID"
+            alertImageRes = R.drawable.user_warning
+            openDialog.value = true
+        } else {
+            showProgressDialog.value = true
+            val userDetails = mapOf(
+                "goodie_distributed" to true,
+            )
+            val checkedInUsers = db.collection("checked_in_users")
+            checkedInUsers.document(localBookingId).get()
+                .addOnCompleteListener { checkedInUser ->
+                    val hasReceivedGoodie =
+                        checkedInUser.result.get("goodie_distributed") == true
+                    if (checkedInUser.result.exists() && !hasReceivedGoodie) {
+                        val tShirtSize =
+                            checkedInUser.result.get("t_shirt_size")
+                        checkedInUsers
+                            .document(localBookingId)
+                            .update(userDetails)
+                            .addOnCompleteListener { registedUser ->
+                                showProgressDialog.value = false
+                                alertTitle = "Eligible for GOODIE"
+                                alertMessage =
+                                    "ID : $localBookingId \n T-SHIRT SIZE: $tShirtSize"
+                                alertImageRes = R.drawable.success
+                                openDialog.value = true
+                            }.addOnFailureListener {
+                                showProgressDialog.value = false
+                                alertTitle = "Booking ID FETCH Failed"
+                                alertMessage = "ID : $localBookingId"
+                                alertImageRes = R.drawable.warning
+                                openDialog.value = true
+                            }
+                    } else {
+                        showProgressDialog.value = false
+                        if (checkedInUser.result.exists()) {
+                            alertTitle = "Goodie Already Distributed"
+                            alertMessage = "ID : $localBookingId"
+                            alertImageRes = R.drawable.block
+                            openDialog.value = true
+                        } else {
+                            alertTitle =
+                                "Unknown Booking ID / User Has not checked In"
+                            alertMessage = "ID : $localBookingId"
+                            alertImageRes = R.drawable.block
+                            openDialog.value = true
+                        }
+                    }
+                }.addOnFailureListener {
+                    showProgressDialog.value = false
+                    alertTitle = "Booking ID FETCH Failed"
+                    alertMessage = "ID : $localBookingId"
+                    alertImageRes = R.drawable.warning
+                    openDialog.value = true
+                }
         }
     }
 
