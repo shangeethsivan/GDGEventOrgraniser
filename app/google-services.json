@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "791255753837",
+    "project_id": "gdgdevfestchennai22",
+    "storage_bucket": "gdgdevfestchennai22.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:791255753837:android:f22db6635512e3688fcb64",
+        "android_client_info": {
+          "package_name": "com.shrappz.gdgchennaigoodiedistrubutor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "791255753837-lf7ekg41jhqoc7eb7b39kclsm0cla765.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8dSF_KQtj7d2O89LVGLAn6WLlY45C0c4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "791255753837-lf7ekg41jhqoc7eb7b39kclsm0cla765.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
