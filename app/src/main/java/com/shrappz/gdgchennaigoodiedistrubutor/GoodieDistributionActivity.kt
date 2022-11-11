@@ -1,22 +1,22 @@
-@file:OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@file:OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 
 package com.shrappz.gdgchennaigoodiedistrubutor
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -36,7 +36,7 @@ import com.shrappz.gdgchennaigoodiedistrubutor.components.DummyProgress
 import com.shrappz.gdgchennaigoodiedistrubutor.ui.theme.GDGChennaiGoodieDistrubutorTheme
 
 
-class MainActivity : ComponentActivity() {
+class GoodieDistributionActivity : ComponentActivity() {
 
     val TAG = this.javaClass.name
 
@@ -63,8 +63,6 @@ class MainActivity : ComponentActivity() {
     private var alertImageRes = R.drawable.warning
     private var alertMessage = ""
 
-    private var goodieChangeCounter = 0
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -86,30 +84,35 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
+
+                    var showProgressDialog by remember { mutableStateOf(false) }
+                    if (showProgressDialog) {
+                        DummyProgress(onDismiss = {
+                            showProgressDialog = false
+                        })
+                    }
+
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
-                            text = "Devfest 2022 Chennai \n Day 1 CHECK IN",
+                            text = "Devfest 2022 Chennai \n Day 1 \n GOODIE DISTRIBUTION",
                             fontSize = 30.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
-                            color = Color.DarkGray,
-                            modifier = Modifier.padding(20.dp)
+                            color = Color.DarkGray
                         )
                         val openDialog = remember { mutableStateOf(false) }
 
                         val bookingIdState = remember { mutableStateOf(TextFieldValue("")) }
-                        var selectedTShirtSize by remember { mutableStateOf("") }
 
                         if (openDialog.value) {
                             AlertDialog(
                                 onDismissRequest = {
                                     openDialog.value = false
                                     bookingIdState.value = TextFieldValue("")
-                                    selectedTShirtSize = ""
                                 },
                                 title = {
                                     Text(text = alertTitle, Modifier.padding(bottom = 20.dp))
@@ -142,7 +145,6 @@ class MainActivity : ComponentActivity() {
                                             onClick = {
                                                 openDialog.value = false
                                                 bookingIdState.value = TextFieldValue("")
-                                                selectedTShirtSize = ""
                                             }
                                         ) {
                                             Text("Dismiss")
@@ -151,6 +153,8 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
+
+                        val keyboardController = LocalSoftwareKeyboardController.current
                         TextField(
                             modifier = Modifier.padding(top = 50.dp),
                             value = bookingIdState.value,
@@ -161,129 +165,62 @@ class MainActivity : ComponentActivity() {
                             maxLines = 1,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Next
+                                imeAction = ImeAction.Done,
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    keyboardController?.hide()
+                                }
                             )
                         )
 
-                        val listItems = arrayOf("S", "M", "L", "XL", "XXL")
-
-                        var expanded by remember {
-                            mutableStateOf(false)
-                        }
-
-                        // the box
-                        ExposedDropdownMenuBox(
-                            expanded = expanded,
-                            onExpandedChange = {
-                                expanded = !expanded
-                            }
-                        ) {
-                            // text field
-                            TextField(
-                                value = selectedTShirtSize,
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text(text = "T-Shirt Size") },
-                                trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(
-                                        expanded = expanded
-                                    )
-                                },
-                                colors = ExposedDropdownMenuDefaults.textFieldColors()
-                            )
-
-                            // menu
-                            ExposedDropdownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false }
-                            ) {
-                                listItems.forEach { selectedOption ->
-                                    // menu item
-                                    DropdownMenuItem(onClick = {
-                                        selectedTShirtSize = selectedOption
-                                        expanded = false
-                                    }) {
-                                        Text(text = selectedOption)
-                                    }
-                                }
-                            }
-                        }
-                        var showProgressDialog by remember { mutableStateOf(false) }
-                        if (showProgressDialog) {
-                            DummyProgress(onDismiss = {
-                                showProgressDialog = false
-                            })
-                        }
-
                         Button(modifier = Modifier.padding(top = 20.dp), onClick = {
                             val bookingId = bookingIdState.value.text
-                            if (bookingId.isEmpty() || selectedTShirtSize.isEmpty()) {
+                            if (bookingId.isEmpty()) {
                                 alertTitle = "Alert!"
-                                alertMessage = "Fill in Booking ID & T-Shirt Size"
+                                alertMessage = "Fill in Booking ID"
                                 alertImageRes = R.drawable.user_warning
                                 openDialog.value = true
                             } else {
                                 showProgressDialog = true
-                                val userDetails = hashMapOf(
-                                    "t_shirt_size" to selectedTShirtSize,
-                                    "goodie_distributed" to false
+                                val userDetails = mapOf(
+                                    "goodie_distributed" to true,
                                 )
-                                db.collection("registered_users")
-                                    .document(bookingId)
-                                    .get().addOnCompleteListener { registedUser ->
-                                        val result = registedUser.result
-                                        val ticketName = result.get("ticket_name")
-                                        val isConferencePass =
-                                            ticketName == "Conference pass - Nov 12th only"
-                                        if (result.exists() && isConferencePass) {
-                                            val userName = registedUser.result.get("name")
-                                            val userEmail = registedUser.result.get("email_id")
-                                            val checkedInUsers = db.collection("checked_in_users")
-                                            checkedInUsers.document(bookingId).get()
-                                                .addOnCompleteListener {
-                                                    if (!it.result.exists()) {
-                                                        checkedInUsers
-                                                            .document(bookingId)
-                                                            .set(userDetails)
-                                                            .addOnCompleteListener {
-                                                                showProgressDialog = false
-                                                                // show alert checked in successful
-                                                                alertTitle = "Welcome $userName"
-                                                                alertMessage = "Check In successful"
-                                                                alertImageRes = R.drawable.success
-                                                                openDialog.value = true
-                                                            }.addOnFailureListener {
-                                                                showProgressDialog = false
-                                                                alertTitle = "Alert!"
-                                                                alertMessage = "Check In Failed"
-                                                                alertImageRes = R.drawable.warning
-                                                                openDialog.value = true
-                                                            }
-                                                    } else {
-                                                        showProgressDialog = false
-                                                        alertTitle = "Already Checked IN!"
-                                                        alertMessage =
-                                                            "Name: $userName Email :$userEmail"
-                                                        alertImageRes = R.drawable.block
-                                                        openDialog.value = true
-                                                    }
+                                val checkedInUsers = db.collection("checked_in_users")
+                                checkedInUsers.document(bookingId).get()
+                                    .addOnCompleteListener { checkedInUser ->
+                                        val hasReceivedGoodie =
+                                            checkedInUser.result.get("goodie_distributed") == true
+                                        if (checkedInUser.result.exists() && !hasReceivedGoodie) {
+                                            val tShirtSize =
+                                                checkedInUser.result.get("t_shirt_size")
+                                            checkedInUsers
+                                                .document(bookingId)
+                                                .update(userDetails)
+                                                .addOnCompleteListener { registedUser ->
+                                                    showProgressDialog = false
+                                                    alertTitle = "Eligible for GOODIE"
+                                                    alertMessage =
+                                                        "ID : $bookingId \n T-SHIRT SIZE: $tShirtSize"
+                                                    alertImageRes = R.drawable.success
+                                                    openDialog.value = true
                                                 }.addOnFailureListener {
                                                     showProgressDialog = false
-                                                    alertTitle = "Alert!"
-                                                    alertMessage = "Check In Failed"
+                                                    alertTitle = "Booking ID FETCH Failed"
+                                                    alertMessage = "ID : $bookingId"
                                                     alertImageRes = R.drawable.warning
                                                     openDialog.value = true
                                                 }
                                         } else {
                                             showProgressDialog = false
-                                            if (result.exists()) {
-                                                alertTitle = "Not Eligible for Day 1 Conference"
-                                                alertMessage =
-                                                    "ID : $bookingId, \n Ticket Type : $ticketName"
+                                            if (checkedInUser.result.exists()) {
+                                                alertTitle = "Goodie Already Distributed"
+                                                alertMessage = "ID : $bookingId"
                                                 alertImageRes = R.drawable.block
                                                 openDialog.value = true
                                             } else {
-                                                alertTitle = "Unknown Booking ID"
+                                                alertTitle =
+                                                    "Unknown Booking ID / User Has not checked In"
                                                 alertMessage = "ID : $bookingId"
                                                 alertImageRes = R.drawable.block
                                                 openDialog.value = true
@@ -298,36 +235,15 @@ class MainActivity : ComponentActivity() {
                                     }
                             }
                         }) {
-                            Text(text = "CHECK-IN")
+                            Text(text = "DISTRIBUTE GOODIE")
                         }
-
                         Image(
                             painter = painterResource(id = R.drawable.devfest_logo),
                             contentDescription = "Devfest 2022 logo",
                             modifier = Modifier
-                                .height(250.dp)
-                                .width(250.dp)
+                                .height(300.dp)
+                                .width(300.dp)
                                 .padding(top = 10.dp)
-                                .combinedClickable(onClick = {
-                                    goodieChangeCounter++
-                                    if (goodieChangeCounter > 10) {
-                                        //launch Goodie page
-                                        goodieChangeCounter = 0
-                                        startActivity(
-                                            Intent(
-                                                this@MainActivity,
-                                                GoodieDistributionActivity::class.java
-                                            )
-                                        )
-                                    }
-                                }, onLongClick = {
-                                    startActivity(
-                                        Intent(
-                                            this@MainActivity,
-                                            AdminPanel::class.java
-                                        )
-                                    )
-                                }),
                         )
                     }
                 }
@@ -347,4 +263,5 @@ class MainActivity : ComponentActivity() {
             Greeting("Android")
         }
     }
+
 }

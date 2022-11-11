@@ -17,6 +17,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.GDGChennaiGoodieDistrubutor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,13 +29,21 @@
             android:name=".UsersLoadActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.GDGChennaiGoodieDistrubutor">
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.GDGChennaiGoodieDistrubutor" />
+        <activity
+            android:name=".GoodieDistributionActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.GDGChennaiGoodieDistrubutor" />
 
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-        </activity>
+        <activity
+            android:name=".AdminPanel"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.GDGChennaiGoodieDistrubutor" />
     </application>
 
 </manifest>
