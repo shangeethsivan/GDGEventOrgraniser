@@ -53,6 +53,13 @@ class MainActivity : ComponentActivity() {
         this.onSignInResult(res)
     }
 
+    val day2TicketTypes = listOf(
+        "Android Jetpack Compose Camp by Somasundaram Mahesh",
+        "How to build the best packages and plugins in Flutter by Vivek Yadav",
+        "Build your first MLOps Pipeline using ZenML on GCP by Jayesh Sharma",
+        "Cloud Hero - RGDC - Intro to Infrastructure by Manikandan Krishnamurthy",
+    )
+
     private fun onSignInResult(res: FirebaseAuthUIAuthenticationResult?) {
         if (res?.resultCode == RESULT_OK) {
             // Successfully signed in
@@ -71,6 +78,7 @@ class MainActivity : ComponentActivity() {
     private var alertMessage = ""
 
     private var goodieChangeCounter = 0
+    private var adminPanelCounter = 0
 
     private val bookingId = MutableStateFlow(TextFieldValue(""))
 
@@ -105,6 +113,7 @@ class MainActivity : ComponentActivity() {
             val signInIntent = AuthUI.getInstance()
                 .createSignInIntentBuilder()
                 .setAvailableProviders(providers)
+                .setIsSmartLockEnabled(false)
                 .build()
             signInLauncher.launch(signInIntent)
         }
@@ -122,7 +131,7 @@ class MainActivity : ComponentActivity() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
-                            text = "Devfest 2022 Chennai \n Day 1 CHECK IN",
+                            text = "Devfest 2022 Chennai \n Day 2 CHECK IN",
                             fontSize = 30.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
@@ -283,12 +292,12 @@ class MainActivity : ComponentActivity() {
                                     .get().addOnCompleteListener { registedUser ->
                                         val result = registedUser.result
                                         val ticketName = result.get("ticket_name")
-                                        val isConferencePass =
-                                            ticketName == "Conference pass - Nov 12th only"
-                                        if (result.exists() && isConferencePass) {
+                                        val isValidTicket = ticketName in day2TicketTypes
+                                        if (result.exists() && isValidTicket) {
                                             val userName = registedUser.result.get("name")
                                             val userEmail = registedUser.result.get("email_id")
-                                            val checkedInUsers = db.collection("checked_in_users")
+                                            val checkedInUsers =
+                                                db.collection("checked_in_users_day2")
                                             checkedInUsers.document(bookingIdLocal).get()
                                                 .addOnCompleteListener {
                                                     if (!it.result.exists()) {
@@ -327,7 +336,7 @@ class MainActivity : ComponentActivity() {
                                         } else {
                                             showProgressDialog = false
                                             if (result.exists()) {
-                                                alertTitle = "Not Eligible for Day 1 Conference"
+                                                alertTitle = "Not Eligible for Day 2 Conference"
                                                 alertMessage =
                                                     "ID : $bookingIdLocal, \n Ticket Type : $ticketName"
                                                 alertImageRes = R.drawable.block
@@ -371,12 +380,17 @@ class MainActivity : ComponentActivity() {
                                         )
                                     }
                                 }, onLongClick = {
-                                    /*startActivity(
-                                        Intent(
-                                            this@MainActivity,
-                                            AdminPanel::class.java
+                                    adminPanelCounter++
+                                    if (adminPanelCounter > 1) {
+                                        //launch Goodie page
+                                        adminPanelCounter = 0
+                                        startActivity(
+                                            Intent(
+                                                this@MainActivity,
+                                                AdminPanel::class.java
+                                            )
                                         )
-                                    )*/
+                                    }
                                 }),
                         )
                     }

@@ -107,6 +107,7 @@ class GoodieDistributionActivity : ComponentActivity() {
             val signInIntent = AuthUI.getInstance()
                 .createSignInIntentBuilder()
                 .setAvailableProviders(providers)
+                .setIsSmartLockEnabled(false)
                 .build()
             signInLauncher.launch(signInIntent)
         }
@@ -132,7 +133,7 @@ class GoodieDistributionActivity : ComponentActivity() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
-                            text = "Devfest 2022 Chennai \n Day 1 \n GOODIE DISTRIBUTION",
+                            text = "Devfest 2022 Chennai \n Day 2 \n GOODIE DISTRIBUTION",
                             fontSize = 30.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
@@ -248,7 +249,7 @@ class GoodieDistributionActivity : ComponentActivity() {
             val userDetails = mapOf(
                 "goodie_distributed" to true,
             )
-            val checkedInUsers = db.collection("checked_in_users")
+            val checkedInUsers = db.collection("checked_in_users_day2")
             checkedInUsers.document(localBookingId).get()
                 .addOnCompleteListener { checkedInUser ->
                     val hasReceivedGoodie =

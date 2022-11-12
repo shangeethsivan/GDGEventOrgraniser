@@ -30,7 +30,8 @@
             android:exported="true"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.GDGChennaiGoodieDistrubutor" />
+            android:theme="@style/Theme.GDGChennaiGoodieDistrubutor" >
+        </activity>
         <activity
             android:name=".GoodieDistributionActivity"
             android:exported="true"

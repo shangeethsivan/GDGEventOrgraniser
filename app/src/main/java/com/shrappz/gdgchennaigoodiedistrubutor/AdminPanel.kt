@@ -21,7 +21,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
@@ -61,16 +60,16 @@ class AdminPanel : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val user = FirebaseAuth.getInstance().currentUser
-        if (user == null) {
-            val providers = arrayListOf(AuthUI.IdpConfig.EmailBuilder().build())
+        /* val user = FirebaseAuth.getInstance().currentUser
+         if (user == null) {
+             val providers = arrayListOf(AuthUI.IdpConfig.EmailBuilder().build())
 
-            val signInIntent = AuthUI.getInstance()
-                .createSignInIntentBuilder()
-                .setAvailableProviders(providers)
-                .build()
-            signInLauncher.launch(signInIntent)
-        }
+             val signInIntent = AuthUI.getInstance()
+                 .createSignInIntentBuilder()
+                 .setAvailableProviders(providers)
+                 .build()
+             signInLauncher.launch(signInIntent)
+         }*/
 
         setContent {
             GDGChennaiGoodieDistrubutorTheme {
@@ -85,7 +84,7 @@ class AdminPanel : ComponentActivity() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
-                            text = "Devfest 2022 Chennai \n Day 1 \n LIVE CHECK-IN COUNT",
+                            text = "Devfest 2022 Chennai \n Day 2 \n LIVE CHECK-IN COUNT",
                             fontSize = 30.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
@@ -93,6 +92,11 @@ class AdminPanel : ComponentActivity() {
                         )
 
                         var mutableCheckInCount by remember { mutableStateOf(0) }
+                        var sSize by remember { mutableStateOf(0) }
+                        var mSize by remember { mutableStateOf(0) }
+                        var lSize by remember { mutableStateOf(0) }
+                        var xLSize by remember { mutableStateOf(0) }
+                        var xxLSize by remember { mutableStateOf(0) }
 
                         Text(
                             text = "CHECK IN COUNT - $mutableCheckInCount",
@@ -101,6 +105,29 @@ class AdminPanel : ComponentActivity() {
                             color = Color(3, 169, 244),
                             modifier = Modifier.padding(top = 40.dp, bottom = 40.dp)
                         )
+
+                        Row(
+                            Modifier
+                                .padding(top = 10.dp)
+                                .fillMaxWidth()
+                        ) {
+                            Text("S", Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
+                            Text("M", Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
+                            Text("L", Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
+                            Text("XL", Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
+                            Text("XXL", Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
+                        }
+                        Row(
+                            Modifier
+                                .padding(top = 10.dp)
+                                .fillMaxWidth()
+                        ) {
+                            Text(text = sSize.toString(), Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
+                            Text(mSize.toString(), Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
+                            Text(lSize.toString(), Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
+                            Text(xLSize.toString(), Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
+                            Text(xxLSize.toString(), Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
+                        }
 
                         Image(
                             painter = painterResource(id = R.drawable.devfest_logo),
@@ -155,18 +182,58 @@ class AdminPanel : ComponentActivity() {
                                 }
                             )
                         }
-                        val docRef = db.collection("checked_in_users")
+                        val docRef = db.collection("checked_in_users_day2")
                         docRef.addSnapshotListener { snapshot, e ->
-
                             if (e != null) {
                                 Log.w(TAG, "Listen failed.", e)
                                 return@addSnapshotListener
                             }
-                            if (snapshot != null) {
-                                mutableCheckInCount = snapshot.documents.size
-                            } else {
-                                mutableCheckInCount = 0
+                            mutableCheckInCount = snapshot?.documents?.size ?: 0
+                        }
+
+                        val query = docRef.whereEqualTo("t_shirt_size", "S")
+                        query.addSnapshotListener { snapshot, e ->
+                            if (e != null) {
+                                Log.w(TAG, "Listen failed.", e)
+                                return@addSnapshotListener
                             }
+                            sSize = snapshot?.documents?.size ?: 0
+                        }
+
+                        val mQuery = docRef.whereEqualTo("t_shirt_size", "M")
+                        mQuery.addSnapshotListener { snapshot, e ->
+                            if (e != null) {
+                                Log.w(TAG, "Listen failed.", e)
+                                return@addSnapshotListener
+                            }
+                            mSize = snapshot?.documents?.size ?: 0
+                        }
+
+                        val LQuery = docRef.whereEqualTo("t_shirt_size", "L")
+                        LQuery.addSnapshotListener { snapshot, e ->
+                            if (e != null) {
+                                Log.w(TAG, "Listen failed.", e)
+                                return@addSnapshotListener
+                            }
+                            lSize = snapshot?.documents?.size ?: 0
+                        }
+
+                        val xLQuery = docRef.whereEqualTo("t_shirt_size", "XL")
+                        xLQuery.addSnapshotListener { snapshot, e ->
+                            if (e != null) {
+                                Log.w(TAG, "Listen failed.", e)
+                                return@addSnapshotListener
+                            }
+                            xLSize = snapshot?.documents?.size ?: 0
+                        }
+
+                        val xxLQuery = docRef.whereEqualTo("t_shirt_size", "XXL")
+                        xxLQuery.addSnapshotListener { snapshot, e ->
+                            if (e != null) {
+                                Log.w(TAG, "Listen failed.", e)
+                                return@addSnapshotListener
+                            }
+                            xxLSize = snapshot?.documents?.size ?: 0
                         }
 
                     }
