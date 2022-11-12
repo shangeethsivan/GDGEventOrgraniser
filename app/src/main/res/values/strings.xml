@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">GDGChennai Day 2 Check IN</string>
+    <string name="confirm_message">Name : %s \n Ticket Type: %s</string>
 </resources>
