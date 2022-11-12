@@ -2,6 +2,7 @@
 
 package com.shrappz.gdgchennaigoodiedistrubutor
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -19,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,6 +35,7 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.shrappz.gdgchennaigoodiedistrubutor.components.DummyProgress
@@ -90,7 +93,7 @@ class GoodieDistributionActivity : ComponentActivity() {
             is QRResult.QRSuccess -> {
                 Log.d(TAG, "result content::${result.content.rawValue}")
                 bookingId.value = TextFieldValue(result.content.rawValue)
-                buttonClick()
+                buttonClick(applicationContext)
             }
             QRResult.QRUserCanceled -> {
             }
@@ -218,8 +221,9 @@ class GoodieDistributionActivity : ComponentActivity() {
                             )
                         )
 
+                        val context = LocalContext.current
                         Button(modifier = Modifier.padding(top = 20.dp), onClick = {
-                            buttonClick()
+                            buttonClick(context)
                         }) {
                             Text(text = "DISTRIBUTE GOODIE")
                         }
@@ -237,65 +241,89 @@ class GoodieDistributionActivity : ComponentActivity() {
         }
     }
 
-    fun buttonClick() {
-        val localBookingId = bookingId.value.text
-        if (localBookingId.isEmpty()) {
-            alertTitle = "Alert!"
-            alertMessage = "Fill in Booking ID"
-            alertImageRes = R.drawable.user_warning
-            openDialog.value = true
-        } else {
-            showProgressDialog.value = true
-            val userDetails = mapOf(
-                "goodie_distributed" to true,
-            )
-            val checkedInUsers = db.collection("checked_in_users_day2")
-            checkedInUsers.document(localBookingId).get()
-                .addOnCompleteListener { checkedInUser ->
-                    val hasReceivedGoodie =
-                        checkedInUser.result.get("goodie_distributed") == true
-                    if (checkedInUser.result.exists() && !hasReceivedGoodie) {
-                        val tShirtSize =
-                            checkedInUser.result.get("t_shirt_size")
-                        checkedInUsers
-                            .document(localBookingId)
-                            .update(userDetails)
-                            .addOnCompleteListener { registedUser ->
+    fun buttonClick(context: Context) {
+        try {
+            val localBookingId = bookingId.value.text
+            if (localBookingId.isEmpty()) {
+                alertTitle = "Alert!"
+                alertMessage = "Fill in Booking ID"
+                alertImageRes = R.drawable.user_warning
+                openDialog.value = true
+            } else {
+                showProgressDialog.value = true
+                val userDetails = mapOf(
+                    "goodie_distributed" to true,
+                )
+                val checkedInUsers = db.collection("checked_in_users_day2")
+                checkedInUsers.document(localBookingId).get()
+                    .addOnCompleteListener { checkedInUserTask ->
+                        if (checkedInUserTask.isSuccessful) {
+                            val hasReceivedGoodie =
+                                checkedInUserTask.result.get("goodie_distributed") == true
+                            if (checkedInUserTask.result.exists() && !hasReceivedGoodie) {
+                                val tShirtSize =
+                                    checkedInUserTask.result.get("t_shirt_size")
+                                checkedInUsers
+                                    .document(localBookingId)
+                                    .update(userDetails)
+                                    .addOnCompleteListener { registedUser ->
+                                        showProgressDialog.value = false
+                                        alertTitle = "Eligible for GOODIE"
+                                        alertMessage =
+                                            "ID : $localBookingId \n T-SHIRT SIZE: $tShirtSize"
+                                        alertImageRes = R.drawable.success
+                                        openDialog.value = true
+                                    }.addOnFailureListener {
+                                        showProgressDialog.value = false
+                                        alertTitle = "Booking ID FETCH Failed"
+                                        alertMessage = "ID : $localBookingId"
+                                        alertImageRes = R.drawable.warning
+                                        openDialog.value = true
+                                    }
+                            } else {
                                 showProgressDialog.value = false
-                                alertTitle = "Eligible for GOODIE"
-                                alertMessage =
-                                    "ID : $localBookingId \n T-SHIRT SIZE: $tShirtSize"
-                                alertImageRes = R.drawable.success
-                                openDialog.value = true
-                            }.addOnFailureListener {
-                                showProgressDialog.value = false
-                                alertTitle = "Booking ID FETCH Failed"
-                                alertMessage = "ID : $localBookingId"
-                                alertImageRes = R.drawable.warning
-                                openDialog.value = true
+                                if (checkedInUserTask.result.exists()) {
+                                    alertTitle = "Goodie Already Distributed"
+                                    alertMessage = "ID : $localBookingId"
+                                    alertImageRes = R.drawable.block
+                                    openDialog.value = true
+                                } else {
+                                    alertTitle =
+                                        "Unknown Booking ID / User Has not checked In"
+                                    alertMessage = "ID : $localBookingId"
+                                    alertImageRes = R.drawable.block
+                                    openDialog.value = true
+                                }
                             }
-                    } else {
-                        showProgressDialog.value = false
-                        if (checkedInUser.result.exists()) {
-                            alertTitle = "Goodie Already Distributed"
-                            alertMessage = "ID : $localBookingId"
-                            alertImageRes = R.drawable.block
+                        } else {
+                            showProgressDialog.value = false
+                            alertTitle = "No Permission"
+                            alertMessage = "Pls contact admin for permission"
+                            alertImageRes = R.drawable.warning
+                            openDialog.value = true
+                        }
+                    }.addOnFailureListener {
+                        if (it is FirebaseFirestoreException && it.code == FirebaseFirestoreException.Code.PERMISSION_DENIED) {
+                            showProgressDialog.value = false
+                            alertTitle = "No Check-Out Permission"
+                            alertMessage = "Pls contact admin for permission"
+                            alertImageRes = R.drawable.user_warning
                             openDialog.value = true
                         } else {
-                            alertTitle =
-                                "Unknown Booking ID / User Has not checked In"
+                            showProgressDialog.value = false
+                            alertTitle = "Booking ID FETCH Failed"
                             alertMessage = "ID : $localBookingId"
-                            alertImageRes = R.drawable.block
+                            alertImageRes = R.drawable.warning
                             openDialog.value = true
                         }
                     }
-                }.addOnFailureListener {
-                    showProgressDialog.value = false
-                    alertTitle = "Booking ID FETCH Failed"
-                    alertMessage = "ID : $localBookingId"
-                    alertImageRes = R.drawable.warning
-                    openDialog.value = true
-                }
+            }
+        } catch (exception: Exception) {
+            Toast.makeText(
+                context,
+                "No Permission/Internet Contact admin",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
