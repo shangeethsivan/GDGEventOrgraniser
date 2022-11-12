@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
@@ -77,4 +78,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore-ktx'
 
     implementation("io.github.g00fy2.quickie:quickie-bundled:1.5.2")
+
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation 'com.google.firebase:firebase-analytics'
 }
