@@ -2,6 +2,7 @@
 
 package com.shrappz.gdgchennaigoodiedistrubutor
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -23,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -34,7 +36,6 @@ import androidx.compose.ui.unit.sp
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
-import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.ktx.firestore
@@ -80,8 +81,20 @@ class MainActivity : ComponentActivity() {
     private var alertImageRes = R.drawable.warning
     private var alertMessage = ""
 
+    private val confirmAlertTitle = "Confirm Details"
+    private var confirmUserName = ""
+    private var confirmTicketType = ""
+
     private var goodieChangeCounter = 0
     private var adminPanelCounter = 0
+
+    private val openAlertDialog = MutableStateFlow(false)
+
+    private val openConfirmDialog = MutableStateFlow(false)
+
+    private val selectedTShirtSize = MutableStateFlow("")
+
+    private val showProgressDialog = MutableStateFlow(false)
 
     private val bookingId = MutableStateFlow(TextFieldValue(""))
 
@@ -120,7 +133,6 @@ class MainActivity : ComponentActivity() {
                 .build()
             signInLauncher.launch(signInIntent)
         }
-
         setContent {
             GDGChennaiGoodieDistrubutorTheme {
                 // A surface container using the 'background' color from the theme
@@ -141,17 +153,13 @@ class MainActivity : ComponentActivity() {
                             color = Color.DarkGray,
                             modifier = Modifier.padding(20.dp)
                         )
-                        val openDialog = remember { mutableStateOf(false) }
-
                         val bookingIdState = bookingId.collectAsState(TextFieldValue(""))
 
-                        var selectedTShirtSize by remember { mutableStateOf("") }
-
-                        if (openDialog.value) {
+                        if (openAlertDialog.collectAsState().value) {
                             AlertDialog(
                                 onDismissRequest = {
-                                    openDialog.value = false
-                                    selectedTShirtSize = ""
+                                    openAlertDialog.value = false
+                                    selectedTShirtSize.value = ""
                                 },
                                 title = {
                                     Text(text = alertTitle, Modifier.padding(bottom = 20.dp))
@@ -182,8 +190,72 @@ class MainActivity : ComponentActivity() {
                                     ) {
                                         Button(
                                             onClick = {
-                                                openDialog.value = false
-                                                selectedTShirtSize = ""
+                                                openAlertDialog.value = false
+                                                selectedTShirtSize.value = ""
+                                            }
+                                        ) {
+                                            Text("Dismiss")
+                                        }
+                                    }
+                                }
+                            )
+                        }
+
+                        if (openConfirmDialog.collectAsState().value) {
+                            AlertDialog(
+                                onDismissRequest = {
+                                    openConfirmDialog.value = false
+                                    confirmUserName = ""
+                                    confirmTicketType = ""
+                                },
+                                title = {
+                                    Text(text = confirmAlertTitle, Modifier.padding(bottom = 20.dp))
+                                },
+                                text = {
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.user_warning),
+                                            contentDescription = "Confirm Alert Image",
+                                            modifier = Modifier
+                                                .height(50.dp)
+                                                .width(50.dp)
+                                        )
+                                        Text(
+                                            stringResource(
+                                                id = R.string.confirm_message,
+                                                confirmUserName,
+                                                confirmTicketType
+                                            ),
+                                        )
+                                    }
+                                },
+                                buttons = {
+                                    Row(
+                                        modifier = Modifier
+                                            .padding(all = 8.dp)
+                                            .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.End
+                                    ) {
+                                        Button(
+                                            onClick = {
+                                                val localUserName = confirmUserName
+                                                onCheckInClick(localUserName)
+                                                openConfirmDialog.value = false
+                                                confirmUserName = ""
+                                                confirmTicketType = ""
+                                            }
+                                        ) {
+                                            Text("Check-IN")
+                                        }
+                                        Button(
+                                            modifier = Modifier.padding(start = 10.dp),
+                                            onClick = {
+                                                openConfirmDialog.value = false
+                                                confirmUserName = ""
+                                                confirmTicketType = ""
                                             }
                                         ) {
                                             Text("Dismiss")
@@ -242,7 +314,7 @@ class MainActivity : ComponentActivity() {
                         ) {
                             // text field
                             TextField(
-                                value = selectedTShirtSize,
+                                value = selectedTShirtSize.collectAsState().value,
                                 onValueChange = {},
                                 readOnly = true,
                                 label = { Text(text = "T-Shirt Size") },
@@ -262,7 +334,7 @@ class MainActivity : ComponentActivity() {
                                 listItems.forEach { selectedOption ->
                                     // menu item
                                     DropdownMenuItem(onClick = {
-                                        selectedTShirtSize = selectedOption
+                                        selectedTShirtSize.value = selectedOption
                                         expanded = false
                                     }) {
                                         Text(text = selectedOption)
@@ -270,130 +342,17 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }
-                        var showProgressDialog by remember { mutableStateOf(false) }
-                        if (showProgressDialog) {
+                        if (showProgressDialog.collectAsState().value) {
                             DummyProgress(onDismiss = {
-                                showProgressDialog = false
+                                showProgressDialog.value = false
                             })
                         }
 
                         val context = LocalContext.current
                         Button(modifier = Modifier.padding(top = 20.dp), onClick = {
-                            try {
-                                val bookingIdLocal = bookingId.value.text
-                                if (bookingIdLocal.isEmpty() || selectedTShirtSize.isEmpty()) {
-                                    alertTitle = "Alert!"
-                                    alertMessage = "Fill in Booking ID & T-Shirt Size"
-                                    alertImageRes = R.drawable.user_warning
-                                    openDialog.value = true
-                                } else {
-                                    showProgressDialog = true
-                                    val userDetails = hashMapOf(
-                                        "t_shirt_size" to selectedTShirtSize,
-                                        "goodie_distributed" to false
-                                    )
-                                    db.collection("registered_users")
-                                        .document(bookingIdLocal)
-                                        .get().addOnCompleteListener { registedUserTask ->
-                                            if (registedUserTask.isSuccessful) {
-                                                val result = registedUserTask.result
-                                                val ticketName = result.get("ticket_name")
-                                                val isValidTicket = ticketName in day2TicketTypes
-                                                if (result.exists() && isValidTicket) {
-                                                    val userName =
-                                                        registedUserTask.result.get("name")
-                                                    val userEmail =
-                                                        registedUserTask.result.get("email_id")
-                                                    val checkedInUsers =
-                                                        db.collection("checked_in_users_day2")
-                                                    checkedInUsers.document(bookingIdLocal).get()
-                                                        .addOnCompleteListener {
-                                                            if (!it.result.exists()) {
-                                                                checkedInUsers
-                                                                    .document(bookingIdLocal)
-                                                                    .set(userDetails)
-                                                                    .addOnCompleteListener {
-                                                                        showProgressDialog = false
-                                                                        // show alert checked in successful
-                                                                        alertTitle =
-                                                                            "Welcome $userName"
-                                                                        alertMessage =
-                                                                            "Check In successful"
-                                                                        alertImageRes =
-                                                                            R.drawable.success
-                                                                        openDialog.value = true
-                                                                    }.addOnFailureListener {
-                                                                        showProgressDialog = false
-                                                                        alertTitle = "Alert!"
-                                                                        alertMessage =
-                                                                            "Check In Failed"
-                                                                        alertImageRes =
-                                                                            R.drawable.warning
-                                                                        openDialog.value = true
-                                                                    }
-                                                            } else {
-                                                                showProgressDialog = false
-                                                                alertTitle = "Already Checked IN!"
-                                                                alertMessage =
-                                                                    "Name: $userName Email :$userEmail"
-                                                                alertImageRes = R.drawable.block
-                                                                openDialog.value = true
-                                                            }
-                                                        }.addOnFailureListener {
-                                                            showProgressDialog = false
-                                                            alertTitle = "Alert!"
-                                                            alertMessage = "Check In Failed"
-                                                            alertImageRes = R.drawable.warning
-                                                            openDialog.value = true
-                                                        }
-                                                } else {
-                                                    showProgressDialog = false
-                                                    if (result.exists()) {
-                                                        alertTitle =
-                                                            "Not Eligible for Day 2 Conference"
-                                                        alertMessage =
-                                                            "ID : $bookingIdLocal, \n Ticket Type : $ticketName"
-                                                        alertImageRes = R.drawable.block
-                                                        openDialog.value = true
-                                                    } else {
-                                                        alertTitle = "Unknown Booking ID"
-                                                        alertMessage = "ID : $bookingIdLocal"
-                                                        alertImageRes = R.drawable.block
-                                                        openDialog.value = true
-                                                    }
-                                                }
-                                            } else {
-                                                showProgressDialog = false
-                                                alertTitle = "No Permission"
-                                                alertMessage = "Pls contact admin for permission"
-                                                alertImageRes = R.drawable.warning
-                                                openDialog.value = true
-                                            }
-                                        }.addOnFailureListener {
-                                            if (it is FirebaseFirestoreException && it.code == FirebaseFirestoreException.Code.PERMISSION_DENIED) {
-                                                showProgressDialog = false
-                                                alertTitle = "No Check-IN Permission"
-                                                alertMessage = "Pls contact admin for permission"
-                                                alertImageRes = R.drawable.user_warning
-                                                openDialog.value = true
-                                            } else {
-                                                showProgressDialog = false
-                                                alertTitle = "Booking ID FETCH Failed"
-                                                alertMessage = "ID : $bookingIdLocal"
-                                                alertImageRes = R.drawable.warning
-                                                openDialog.value = true
-                                            }
-                                        }
-                                }
-                            } catch (exception: Exception) {
-                                Toast.makeText(
-                                    context,
-                                    "No Permission/Internet Contact admin",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
+                            onFetchDetailsClicked(context)
                         }) {
-                            Text(text = "CHECK-IN")
+                            Text(text = "Fetch Details")
                         }
 
                         Image(
@@ -416,7 +375,7 @@ class MainActivity : ComponentActivity() {
                                         )
                                     }
                                 }, onLongClick = {
-                                    adminPanelCounter++
+                                    /*adminPanelCounter++
                                     if (adminPanelCounter > 1) {
                                         //launch Goodie page
                                         adminPanelCounter = 0
@@ -426,13 +385,136 @@ class MainActivity : ComponentActivity() {
                                                 AdminPanel::class.java
                                             )
                                         )
-                                    }
+                                    }*/
                                 }),
                         )
                     }
                 }
             }
         }
+    }
+
+    fun onFetchDetailsClicked(context: Context) {
+        try {
+            val bookingIdLocal = bookingId.value.text
+            val tShirtSizeLocal = selectedTShirtSize.value
+            if (bookingIdLocal.isEmpty() || tShirtSizeLocal.isEmpty()) {
+                alertTitle = "Alert!"
+                alertMessage = "Fill in Booking ID & T-Shirt Size"
+                alertImageRes = R.drawable.user_warning
+                openAlertDialog.value = true
+            } else {
+                showProgressDialog.value = true
+                db.collection("registered_users")
+                    .document(bookingIdLocal)
+                    .get().addOnCompleteListener { registedUserTask ->
+                        if (registedUserTask.isSuccessful) {
+                            val result = registedUserTask.result
+                            val ticketName = result.get("ticket_name")
+                            val isValidTicket = ticketName in day2TicketTypes
+                            if (result.exists() && isValidTicket) {
+                                showProgressDialog.value = false
+                                val userName =
+                                    registedUserTask.result.get("name")
+                                confirmUserName = userName.toString()
+                                confirmTicketType = ticketName.toString()
+                                openConfirmDialog.value = true
+                            } else {
+                                showProgressDialog.value = false
+                                if (result.exists()) {
+                                    alertTitle =
+                                        "Not Eligible for Day 2 Conference"
+                                    alertMessage =
+                                        "ID : $bookingIdLocal, \n Ticket Type : $ticketName"
+                                    alertImageRes = R.drawable.block
+                                    openAlertDialog.value = true
+                                } else {
+                                    alertTitle = "Unknown Booking ID"
+                                    alertMessage = "ID : $bookingIdLocal"
+                                    alertImageRes = R.drawable.block
+                                    openAlertDialog.value = true
+                                }
+                            }
+                        } else {
+                            showProgressDialog.value = false
+                            alertTitle = "No Permission"
+                            alertMessage = "Pls contact admin for permission"
+                            alertImageRes = R.drawable.warning
+                            openAlertDialog.value = true
+                        }
+                    }.addOnFailureListener {
+                        if (it is FirebaseFirestoreException && it.code == FirebaseFirestoreException.Code.PERMISSION_DENIED) {
+                            showProgressDialog.value = false
+                            alertTitle = "No Check-IN Permission"
+                            alertMessage = "Pls contact admin for permission"
+                            alertImageRes = R.drawable.user_warning
+                            openAlertDialog.value = true
+                        } else {
+                            showProgressDialog.value = false
+                            alertTitle = "Booking ID FETCH Failed"
+                            alertMessage = "ID : $bookingIdLocal"
+                            alertImageRes = R.drawable.warning
+                            openAlertDialog.value = true
+                        }
+                    }
+            }
+        } catch (exception: Exception) {
+            Toast.makeText(
+                context,
+                "No Permission/Internet Contact admin",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    fun onCheckInClick(userName: String) {
+        val bookingIdLocal = bookingId.value.text
+        val tShirtSize = selectedTShirtSize.value
+        val userDetails = mapOf(
+            "goodie_distributed" to false,
+            "t_shirt_size" to tShirtSize,
+        )
+        val checkedInUsers =
+            db.collection("checked_in_users_day2")
+        checkedInUsers.document(bookingIdLocal).get()
+            .addOnCompleteListener {
+                if (!it.result.exists()) {
+                    checkedInUsers
+                        .document(bookingIdLocal)
+                        .set(userDetails)
+                        .addOnCompleteListener {
+                            showProgressDialog.value = false
+                            // show alert checked in successful
+                            alertTitle =
+                                "Welcome $userName"
+                            alertMessage =
+                                "Check In successful"
+                            alertImageRes =
+                                R.drawable.success
+                            openAlertDialog.value = true
+                        }.addOnFailureListener {
+                            showProgressDialog.value = false
+                            alertTitle = "Alert!"
+                            alertMessage =
+                                "Check In Failed"
+                            alertImageRes =
+                                R.drawable.warning
+                            openAlertDialog.value = true
+                        }
+                } else {
+                    showProgressDialog.value = false
+                    alertTitle = "Already Checked IN!"
+                    alertMessage = "Name: $userName"
+                    alertImageRes = R.drawable.block
+                    openAlertDialog.value = true
+                }
+            }.addOnFailureListener {
+                showProgressDialog.value = false
+                alertTitle = "Alert!"
+                alertMessage = "Check In Failed"
+                alertImageRes = R.drawable.warning
+                openAlertDialog.value = true
+            }
     }
 
     @Composable
