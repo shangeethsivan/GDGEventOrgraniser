@@ -375,7 +375,7 @@ class MainActivity : ComponentActivity() {
                                         )
                                     }
                                 }, onLongClick = {
-                                    /*adminPanelCounter++
+                                    adminPanelCounter++
                                     if (adminPanelCounter > 1) {
                                         //launch Goodie page
                                         adminPanelCounter = 0
@@ -385,7 +385,7 @@ class MainActivity : ComponentActivity() {
                                                 AdminPanel::class.java
                                             )
                                         )
-                                    }*/
+                                    }
                                 }),
                         )
                     }
