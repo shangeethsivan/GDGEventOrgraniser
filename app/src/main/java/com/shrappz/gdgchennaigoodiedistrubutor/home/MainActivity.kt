@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 
-package com.shrappz.gdgchennaigoodiedistrubutor
+package com.shrappz.gdgchennaigoodiedistrubutor.home
 
 import android.content.Context
 import android.content.Intent
@@ -40,7 +40,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.shrappz.gdgchennaigoodiedistrubutor.R
+import com.shrappz.gdgchennaigoodiedistrubutor.admin.AdminPanelActivity
 import com.shrappz.gdgchennaigoodiedistrubutor.components.DummyProgress
+import com.shrappz.gdgchennaigoodiedistrubutor.distrubution.GoodieDistributionActivity
 import com.shrappz.gdgchennaigoodiedistrubutor.ui.theme.GDGChennaiGoodieDistrubutorTheme
 import io.github.g00fy2.quickie.QRResult
 import io.github.g00fy2.quickie.ScanQRCode
@@ -85,8 +88,8 @@ class MainActivity : ComponentActivity() {
     private var confirmUserName = ""
     private var confirmTicketType = ""
 
-    private var goodieChangeCounter = 0
-    private var adminPanelCounter = 0
+    private var goodieChangeCounter by mutableStateOf(0)
+    private var adminPanelCounter by mutableStateOf(0)
 
     private val openAlertDialog = MutableStateFlow(false)
 
@@ -382,7 +385,7 @@ class MainActivity : ComponentActivity() {
                                         startActivity(
                                             Intent(
                                                 this@MainActivity,
-                                                AdminPanel::class.java
+                                                AdminPanelActivity::class.java
                                             )
                                         )
                                     }

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 
-package com.shrappz.gdgchennaigoodiedistrubutor
+package com.shrappz.gdgchennaigoodiedistrubutor.distrubution
 
 import android.content.Context
 import android.os.Bundle
@@ -38,6 +38,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.shrappz.gdgchennaigoodiedistrubutor.R
 import com.shrappz.gdgchennaigoodiedistrubutor.components.DummyProgress
 import com.shrappz.gdgchennaigoodiedistrubutor.ui.theme.GDGChennaiGoodieDistrubutorTheme
 import io.github.g00fy2.quickie.QRResult

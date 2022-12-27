@@ -1,7 +1,8 @@
 @file:OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 
-package com.shrappz.gdgchennaigoodiedistrubutor
+package com.shrappz.gdgchennaigoodiedistrubutor.admin
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -26,13 +27,16 @@ import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.shrappz.gdgchennaigoodiedistrubutor.EVENT_DAY_ID
+import com.shrappz.gdgchennaigoodiedistrubutor.R
+import com.shrappz.gdgchennaigoodiedistrubutor.pages.data_download.DataDownloadActivity
 import com.shrappz.gdgchennaigoodiedistrubutor.ui.theme.GDGChennaiGoodieDistrubutorTheme
 
 
-class AdminPanel : ComponentActivity() {
+class AdminPanelActivity : ComponentActivity() {
 
 
-    val TAG = AdminPanel::class.java.name
+    val TAG = AdminPanelActivity::class.java.name
 
     private val signInLauncher = registerForActivityResult(
         FirebaseAuthUIActivityResultContract()
@@ -111,22 +115,81 @@ class AdminPanel : ComponentActivity() {
                                 .padding(top = 10.dp)
                                 .fillMaxWidth()
                         ) {
-                            Text("S", Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
-                            Text("M", Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
-                            Text("L", Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
-                            Text("XL", Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
-                            Text("XXL", Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
+                            Text(
+                                "S",
+                                Modifier
+                                    .fillMaxWidth()
+                                    .weight(1F), textAlign = TextAlign.Center
+                            )
+                            Text(
+                                "M",
+                                Modifier
+                                    .fillMaxWidth()
+                                    .weight(1F), textAlign = TextAlign.Center
+                            )
+                            Text(
+                                "L",
+                                Modifier
+                                    .fillMaxWidth()
+                                    .weight(1F), textAlign = TextAlign.Center
+                            )
+                            Text(
+                                "XL",
+                                Modifier
+                                    .fillMaxWidth()
+                                    .weight(1F), textAlign = TextAlign.Center
+                            )
+                            Text(
+                                "XXL",
+                                Modifier
+                                    .fillMaxWidth()
+                                    .weight(1F), textAlign = TextAlign.Center
+                            )
                         }
                         Row(
                             Modifier
                                 .padding(top = 10.dp)
                                 .fillMaxWidth()
                         ) {
-                            Text(text = sSize.toString(), Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
-                            Text(mSize.toString(), Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
-                            Text(lSize.toString(), Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
-                            Text(xLSize.toString(), Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
-                            Text(xxLSize.toString(), Modifier.fillMaxWidth().weight(1F), textAlign = TextAlign.Center)
+                            Text(
+                                text = sSize.toString(),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .weight(1F), textAlign = TextAlign.Center
+                            )
+                            Text(
+                                mSize.toString(),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .weight(1F), textAlign = TextAlign.Center
+                            )
+                            Text(
+                                lSize.toString(),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .weight(1F), textAlign = TextAlign.Center
+                            )
+                            Text(
+                                xLSize.toString(),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .weight(1F), textAlign = TextAlign.Center
+                            )
+                            Text(
+                                xxLSize.toString(),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .weight(1F), textAlign = TextAlign.Center
+                            )
+                        }
+
+                        Button(onClick = {
+                            startActivity(
+                                Intent(this@AdminPanelActivity, DataDownloadActivity::class.java)
+                                    .putExtra(EVENT_DAY_ID, "checked_in_users_day2")
+                            )
+                        }) {
+                            Text(text = "Download Day 2 Users Data")
                         }
 
                         Image(
@@ -235,7 +298,6 @@ class AdminPanel : ComponentActivity() {
                             }
                             xxLSize = snapshot?.documents?.size ?: 0
                         }
-
                     }
                 }
             }
