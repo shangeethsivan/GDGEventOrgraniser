@@ -16,13 +16,23 @@ I know creating an App in a Day is something interesting.
 * Architecture wise dont expect anything since we rushed in creating it.
 * Compose for UI 
 * Firebase Firestore for DB
-* Planning to properly move this to a MVVM architecture.
+* Firebase Crashlytics for crash monitoring
+* Firebase Authentication for authenticating organisers
+* Planning to properly move this to a MVVM architecture
 
 ### Features Planned / Under Dev: 
 * Download Checked in users data as CSV File.
 * Use NavHost in compose and NavRail 
 * Move all pages to follow MVVM architecture 
 * Use Hilt for DI
+* Create a generic app that can be used by all GDG communities world wide for registration and check-ins.
+
+### Stuff we would like to have (Mainly Infra)
+* Create TOML for dependancy management
+* Add renovate plugin to manage and update dependancies
+
+External libraries used :
+https://github.com/G00fY2/quickie
 
 
 ### App Screenshots
