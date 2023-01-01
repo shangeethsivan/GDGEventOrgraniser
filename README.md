@@ -11,6 +11,7 @@ I know creating an App in a Day is something interesting.
 * User Check OUT screen for the user mainly used for providing goodies for the attendees (To avoid giving two goodies for a single attendee)
 * Live Check IN count for organisers
 * Features are subject to change will be creating a slack channel for this project and will share the link here interested ppl can join and contribute.
+* Has a screen to upload CSV data to firebase firestore (Its kind of tricky now where you have to add the data manually to the project the open the screen to upload need to fix this!)
 
 ### Tech Stack
 * Architecture wise dont expect anything since we rushed in creating it.
