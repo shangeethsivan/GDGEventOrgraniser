@@ -1,4 +1,4 @@
-# GDGEventHandler
+# GDGEventOrganiser
 
 This App was created in a Day for smoothening the registration process at GDG Devfest Chennai 2022 (IN-PERSON EVENT). https://devfest.gdgchennai.in/
 
