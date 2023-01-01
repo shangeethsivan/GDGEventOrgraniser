@@ -18,5 +18,4 @@ Tech Stack
 * Firebase Firestore for DB
 * Planning to properly move this to a MVVM architecture.
 
-![Screenshot_20230101_234302_GDGChennai Day 2 Check IN](https://user-images.githubusercontent.com/9254310/210180939-e1dfab1b-604c-4338-b17c-12d277aaf389.jpg)
-![Screenshot_20230101_234309_GDGChennai Day 2 Check IN](https://user-images.githubusercontent.com/9254310/210180941-48489b8e-2723-487f-9828-a4b9653997b2.jpg)
+<img src="https://user-images.githubusercontent.com/9254310/210180939-e1dfab1b-604c-4338-b17c-12d277aaf389.jpg" alt="" height="400" />    <img src="https://user-images.githubusercontent.com/9254310/210180941-48489b8e-2723-487f-9828-a4b9653997b2.jpg" alt="" height="400" />
