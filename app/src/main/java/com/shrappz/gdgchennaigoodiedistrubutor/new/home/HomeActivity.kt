@@ -13,9 +13,7 @@ import androidx.compose.material.NavigationRail
 import androidx.compose.material.NavigationRailItem
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +59,18 @@ class HomeActivity : ComponentActivity() {
                             onClick = { currentDestination = Destination.CheckOut },
                             icon = {
                                 Icon(Icons.Filled.CheckCircle, "")
+                            })
+                        NavigationRailItem(
+                            selected = currentDestination == Destination.Stats,
+                            onClick = { currentDestination = Destination.Stats },
+                            icon = {
+                                Icon(Icons.Filled.Star, "")
+                            })
+                        NavigationRailItem(
+                            selected = currentDestination == Destination.Export,
+                            onClick = { currentDestination = Destination.Export },
+                            icon = {
+                                Icon(Icons.Filled.Email, "")
                             })
                     }
                 }

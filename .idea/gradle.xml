@@ -19,7 +19,9 @@
             <option value="$PROJECT_DIR$/feature" />
             <option value="$PROJECT_DIR$/feature/checkin" />
             <option value="$PROJECT_DIR$/feature/checkout" />
+            <option value="$PROJECT_DIR$/feature/dataexport" />
             <option value="$PROJECT_DIR$/feature/home" />
+            <option value="$PROJECT_DIR$/feature/livestats" />
           </set>
         </option>
       </GradleProjectSettings>

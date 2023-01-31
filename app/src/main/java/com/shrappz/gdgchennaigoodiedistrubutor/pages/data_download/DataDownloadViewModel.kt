@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.shrappz.gdgchennaigoodiedistrubutor.csv.CSVHelper
-import com.shrappz.gdgchennaigoodiedistrubutor.new.EVENT_DAY_ID
+import com.shrappz.gdgchennaigoodiedistrubutor.EVENT_DAY_ID
 import com.shrappz.gdgchennaigoodiedistrubutor.repository.GdgEventDataRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

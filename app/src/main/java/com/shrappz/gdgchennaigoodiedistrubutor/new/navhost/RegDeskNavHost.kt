@@ -5,9 +5,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.export.dataexport.DataExport
 import com.regdesk.checkin.CheckIn
 import com.regdesk.checkout.CheckOut
 import com.regdesk.home.Home
+import com.regdesk.livestats.LiveStats
 import com.shrappz.gdgchennaigoodiedistrubutor.new.Destination
 
 @Composable
@@ -20,5 +22,7 @@ fun RegDeskNavHost(
         composable(Destination.Home.name) { Home() }
         composable(Destination.CheckIn.name) { CheckIn() }
         composable(Destination.CheckOut.name) { CheckOut() }
+        composable(Destination.Stats.name) { LiveStats() }
+        composable(Destination.Export.name) { DataExport() }
     }
 }
