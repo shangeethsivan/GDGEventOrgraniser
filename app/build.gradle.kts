@@ -60,6 +60,9 @@ android {
 
 dependencies {
 
+    implementation(project(":feature:home"))
+    implementation(project(":feature:checkin"))
+    implementation(project(":feature:checkout"))
     // Core Android dependencies
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

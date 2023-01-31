@@ -27,8 +27,8 @@ import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.shrappz.gdgchennaigoodiedistrubutor.EVENT_DAY_ID
 import com.shrappz.gdgchennaigoodiedistrubutor.R
+import com.shrappz.gdgchennaigoodiedistrubutor.new.EVENT_DAY_ID
 import com.shrappz.gdgchennaigoodiedistrubutor.pages.data_download.DataDownloadActivity
 import com.shrappz.gdgchennaigoodiedistrubutor.ui.theme.GDGChennaiGoodieDistrubutorTheme
 
