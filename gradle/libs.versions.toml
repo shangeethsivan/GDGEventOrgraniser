@@ -21,7 +21,7 @@ hilt = "2.44.2"
 junit = "4.13.2"
 kotlin = "1.7.20"
 ksp = "1.7.20-1.0.8"
-qrCodeLib = "1.5.2"
+qrCodeLib = "1.10.0"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
