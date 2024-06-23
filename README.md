@@ -14,7 +14,7 @@ I know creating an App in a Day is something interesting.
 * Has a screen to upload CSV data to firebase firestore (Its kind of tricky now where you have to add the data manually to the project the open the screen to upload need to fix this!)
 
 ### Tech Stack
-* Architecture wise dont expect anything since we rushed in creating it.
+* Architecture wise for now dont expect anything since we rushed in creating it. [MVVM/MVI preferred]
 * Compose for UI 
 * Firebase Firestore for DB
 * Firebase Crashlytics for crash monitoring
