@@ -27,7 +27,7 @@
 
         </provider>
 
-       <!-- <activity
+        <activity
             android:name=".new.home.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
@@ -38,8 +38,8 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>-->
-        <activity android:name=".new.home.HomeActivity"
+        </activity>
+       <!-- <activity android:name=".new.home.HomeActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
@@ -50,7 +50,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity>-->
         <activity
             android:name=".dataupload.UsersLoadActivity"
             android:exported="true"
