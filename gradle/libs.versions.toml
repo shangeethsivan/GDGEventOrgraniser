@@ -20,7 +20,7 @@ googleServicesGradlePlugin = "4.3.14"
 hilt = "2.44.2"
 junit = "4.13.2"
 kotlin = "1.7.20"
-ksp = "1.7.20-1.0.8"
+ksp = "1.9.25-1.0.20"
 qrCodeLib = "1.5.2"
 
 [libraries]
