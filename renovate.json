@@ -6,6 +6,7 @@
     ":dependencyDashboard",
     "schedule:daily"
   ],
+  "gitAuthor": "Renovate Bot Self Hosted <renovate@testing.com>",
   "baseBranches": [
     "master"
   ],
