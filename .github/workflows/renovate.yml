@@ -1,0 +1,16 @@
+name: Renovate SelfHosted
+on:
+  workflow_dispatch: # Allows manual triggering from the Actions tab
+  schedule:
+    # Configure your desired schedule. This example runs daily at 3:00 AM UTC.
+    # Use crontab syntax: https://crontab.guru/
+    - cron: '0 3 * * *'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Renovate Bot GitHub Action
+      uses: renovatebot/github-action@v42.0.1
