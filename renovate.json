@@ -10,7 +10,7 @@
     "master"
   ],
   "repositories": [
-    "shangeethsivan/GDGEventOrganiser"
+    "shangeethsivan/GDGEventOrgraniser"
   ],
   "commitMessageExtra": "{{{currentValue}}} to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}",
   "packageRules": [
