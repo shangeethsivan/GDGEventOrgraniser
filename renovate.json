@@ -10,6 +10,7 @@
   "baseBranches": [
     "master"
   ],
+  "githubTokenWarn": false,
   "repositories": [
     "shangeethsivan/GDGEventOrgraniser"
   ],
