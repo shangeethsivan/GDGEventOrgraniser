@@ -19,8 +19,8 @@ firebaseCrashlyticsGradle = "2.9.2"
 googleServicesGradlePlugin = "4.3.14"
 hilt = "2.44.2"
 junit = "4.13.2"
-kotlin = "2.1.20"
-ksp = "2.1.20-2.0.1"
+kotlin = "2.1.21"
+ksp = "2.1.21-2.0.1"
 qrCodeLib = "1.5.2"
 
 [libraries]
